@@ -42,7 +42,7 @@
   <h1>Upcoming Romeoville Events</h1>
   <div id="events">Loading events...</div>
 
- <script>
+<script>
   async function loadEvents() {
     const rssUrl = "https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml";
     const proxyUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
@@ -58,14 +58,21 @@
         if (count >= 5) return;
 
         const title = item.title || "No title";
-        const rawDescription = item.description;
-        console.log("Raw description:", rawDescription); // 👈 Look here in DevTools
+
+        const cleanHTML = item.description.replace(/<br\s*\/?>/gi, "\n");
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = cleanHTML;
+
+        const dateMatch = item.description.match(/<strong>Event date:<\/strong>\s*([\w\s,–-]+)<br\s*\/?>/i);
+        const date = dateMatch ? dateMatch[1].trim() : "Unknown date";
+
+        const description = tempDiv.textContent.replace(/Event date:.+\n?/i, "").trim();
 
         const eventHTML = `
           <div class="event">
             <div class="event-title">${title}</div>
-            <div class="event-date">[diagnostic] check console</div>
-            <div class="event-description"><pre>${rawDescription}</pre></div>
+            <div class="event-date">${date}</div>
+            <div class="event-description">${description}</div>
           </div>
         `;
         eventContainer.insertAdjacentHTML("beforeend", eventHTML);
@@ -79,5 +86,6 @@
 
   loadEvents();
 </script>
+
 </body>
 </html>
