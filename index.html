@@ -5,7 +5,7 @@
   <meta http-equiv="refresh" content="86400" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Romeoville Events</title>
-  <style>
+ <style>
   body {
     font-family: Arial, sans-serif;
     background: #f8f8f8;
@@ -20,26 +20,24 @@
     margin-bottom: 20px;
   }
 
-  #columns {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
+  table {
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
+    table-layout: fixed;
   }
 
-  .column {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+  td {
+    vertical-align: top;
+    width: 50%;
   }
 
   .event {
     background: #fff;
     border-left: 5px solid #004A8F;
     padding: 15px;
-    margin-bottom: 20px;
     box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    margin-bottom: 10px;
   }
 
   .event-title {
@@ -54,12 +52,12 @@
     line-height: 1.4;
   }
 </style>
+
 </head>
 <body>
   <h1>Upcoming Romeoville Events</h1>
-  <div id="columns">
-  <div class="column" id="column1"></div>
-  <div class="column" id="column2"></div>
+  <div id="event-wrapper">
+  <table id="event-table" cellspacing="20"></table>
 </div>
 
   <script>
@@ -70,13 +68,16 @@
     try {
       const response = await fetch(proxyUrl);
       const data = await response.json();
+
+      const table = document.getElementById("event-table");
+      table.innerHTML = "";
+
       const events = [];
 
-      // Extract and clean up each item
-      data.items.slice(0, 10).forEach(item => {
+      data.items.slice(0, 10).forEach((item, index) => {
         let rawHTML = item.description;
 
-        // Fix formatting for Yodeck
+        // Clean: fix Location formatting
         rawHTML = rawHTML.replace(/<strong>\s*Location:\s*<\/strong>\s*<br\s*\/?>/i, '<strong>Location:</strong> ');
         rawHTML = rawHTML.replace(/<br\s*\/?>\s*Romeoville,\s*IL\s*\d{5}/i, '');
 
@@ -86,23 +87,29 @@
             <div class="event-description">${rawHTML}</div>
           </div>
         `;
+
         events.push(html);
       });
 
-      // Divide into two columns
-      const column1 = document.getElementById("column1");
-      const column2 = document.getElementById("column2");
-
-      events.slice(0, 5).forEach(html => column1.insertAdjacentHTML("beforeend", html));
-      events.slice(5, 10).forEach(html => column2.insertAdjacentHTML("beforeend", html));
-
+      // Build 5 rows with 2 columns
+      for (let i = 0; i < 5; i++) {
+        const row = document.createElement("tr");
+        for (let j = 0; j < 2; j++) {
+          const td = document.createElement("td");
+          const eventIndex = i + j * 5; // Fill column-first
+          td.innerHTML = events[eventIndex] || "";
+          row.appendChild(td);
+        }
+        table.appendChild(row);
+      }
     } catch (error) {
-      document.getElementById("columns").innerText = "Failed to load events.";
+      document.getElementById("event-wrapper").innerText = "Failed to load events.";
       console.error("Error loading events:", error);
     }
   }
 
   loadEvents();
 </script>
+
 </body>
 </html>
