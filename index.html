@@ -5,111 +5,124 @@
   <meta http-equiv="refresh" content="86400" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Romeoville Events</title>
- <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f8f8f8;
-    color: #333;
-    margin: 0;
-    padding: 20px;
-  }
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f8f8;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
 
-  h1 {
-    text-align: center;
-    color: #004A8F;
-    margin-bottom: 20px;
-  }
+    h1 {
+      text-align: center;
+      color: #004A8F;
+      margin-bottom: 20px;
+    }
 
-  table {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    table-layout: fixed;
-  }
+    #scroll-wrapper {
+      max-height: 1720px; /* Adjust if this region shares space with other Yodeck widgets */
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
 
-  td {
-    vertical-align: top;
-    width: 50%;
-  }
+    #scroll-wrapper::-webkit-scrollbar {
+      width: 0;
+      background: transparent;
+    }
 
-  .event {
-    background: #fff;
-    border-left: 5px solid #004A8F;
-    padding: 15px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.05);
-    margin-bottom: 10px;
-  }
+    table {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      table-layout: fixed;
+    }
 
-  .event-title {
-    font-size: 1.1em;
-    font-weight: bold;
-    margin-bottom: 8px;
-    color: #222;
-  }
+    td {
+      vertical-align: top;
+      width: 50%;
+      padding: 10px;
+    }
 
-  .event-description {
-    font-size: 0.95em;
-    line-height: 1.4;
-  }
-</style>
+    .event {
+      background: #fff;
+      border-left: 5px solid #004A8F;
+      padding: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
 
+    .event-title {
+      font-size: 1.1em;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #222;
+    }
+
+    .event-description {
+      font-size: 0.95em;
+      line-height: 1.4;
+    }
+  </style>
 </head>
 <body>
   <h1>Upcoming Romeoville Events</h1>
-  <div id="event-wrapper">
-  <table id="event-table" cellspacing="20"></table>
-</div>
+  <div id="scroll-wrapper">
+    <table id="event-table" cellspacing="0"></table>
+  </div>
 
   <script>
-  async function loadEvents() {
-    const rssUrl = "https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml";
-    const proxyUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
+    async function loadEvents() {
+      const rssUrl = "https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml";
+      const proxyUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
 
-    try {
-      const response = await fetch(proxyUrl);
-      const data = await response.json();
+      try {
+        const response = await fetch(proxyUrl);
+        const data = await response.json();
 
-      const table = document.getElementById("event-table");
-      table.innerHTML = "";
+        const table = document.getElementById("event-table");
+        table.innerHTML = "";
 
-      const events = [];
+        const events = [];
+        const maxItems = Math.min(data.items.length, 20); // Change to 30 or more if needed
 
-      data.items.slice(0, 10).forEach((item, index) => {
-        let rawHTML = item.description;
+        data.items.slice(0, maxItems).forEach((item, index) => {
+          let rawHTML = item.description;
 
-        // Clean: fix Location formatting
-        rawHTML = rawHTML.replace(/<strong>\s*Location:\s*<\/strong>\s*<br\s*\/?>/i, '<strong>Location:</strong> ');
-        rawHTML = rawHTML.replace(/<br\s*\/?>\s*Romeoville,\s*IL\s*\d{5}/i, '');
+          // Clean up formatting
+          rawHTML = rawHTML.replace(/<strong>\s*Location:\s*<\/strong>\s*<br\s*\/?>/i, '<strong>Location:</strong> ');
+          rawHTML = rawHTML.replace(/<br\s*\/?>\s*Romeoville,\s*IL\s*\d{5}/i, '');
 
-        const html = `
-          <div class="event">
-            <div class="event-title">${item.title}</div>
-            <div class="event-description">${rawHTML}</div>
-          </div>
-        `;
+          const html = `
+            <div class="event">
+              <div class="event-title">${item.title}</div>
+              <div class="event-description">${rawHTML}</div>
+            </div>
+          `;
 
-        events.push(html);
-      });
+          events.push(html);
+        });
 
-      // Build 5 rows with 2 columns
-      for (let i = 0; i < 5; i++) {
-        const row = document.createElement("tr");
-        for (let j = 0; j < 2; j++) {
-          const td = document.createElement("td");
-          const eventIndex = i + j * 5; // Fill column-first
-          td.innerHTML = events[eventIndex] || "";
-          row.appendChild(td);
+        // Build rows to fill 2 columns, row by row (column-major)
+        const numColumns = 2;
+        const numRows = Math.ceil(events.length / numColumns);
+
+        for (let i = 0; i < numRows; i++) {
+          const row = document.createElement("tr");
+          for (let j = 0; j < numColumns; j++) {
+            const td = document.createElement("td");
+            const eventIndex = i + j * numRows;
+            td.innerHTML = events[eventIndex] || "";
+            row.appendChild(td);
+          }
+          table.appendChild(row);
         }
-        table.appendChild(row);
+      } catch (error) {
+        document.getElementById("scroll-wrapper").innerText = "Failed to load events.";
+        console.error("Error loading events:", error);
       }
-    } catch (error) {
-      document.getElementById("event-wrapper").innerText = "Failed to load events.";
-      console.error("Error loading events:", error);
     }
-  }
 
-  loadEvents();
-</script>
-
+    loadEvents();
+  </script>
 </body>
 </html>
