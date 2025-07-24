@@ -42,51 +42,42 @@
   <h1>Upcoming Romeoville Events</h1>
   <div id="events">Loading events...</div>
 
-  <script>
-    async function loadEvents() {
-      const rssUrl = "https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml";
-      const proxyUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
-      try {
-        const response = await fetch(proxyUrl);
-        const data = await response.json();
-        const eventContainer = document.getElementById("events");
-        eventContainer.innerHTML = "";
+ <script>
+  async function loadEvents() {
+    const rssUrl = "https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml";
+    const proxyUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
 
-        let count = 0;
-        data.items.forEach(item => {
-          if (count >= 5) return;
+    try {
+      const response = await fetch(proxyUrl);
+      const data = await response.json();
+      const eventContainer = document.getElementById("events");
+      eventContainer.innerHTML = "";
 
-          const title = item.title || "No title";
+      let count = 0;
+      data.items.forEach(item => {
+        if (count >= 5) return;
 
-          // Clean HTML and parse
-          const cleanHTML = item.description.replace(/<br\s*\/?>/gi, "\n");
-          const tempDiv = document.createElement("div");
-          tempDiv.innerHTML = cleanHTML;
+        const title = item.title || "No title";
+        const rawDescription = item.description;
+        console.log("Raw description:", rawDescription); // 👈 Look here in DevTools
 
-          // Extract date from <strong>Event date:</strong> ... <br />
-          const dateMatch = item.description.match(/<strong>Event date:<\/strong>\s*(.+?)<br\s*\/?>/i);
-          const date = dateMatch ? dateMatch[1].trim() : "Unknown date";
-
-          // Extract clean text without "Event date"
-          const description = tempDiv.textContent.replace(/Event date:.+\n?/i, "").trim();
-
-          const eventHTML = `
-            <div class="event">
-              <div class="event-title">${title}</div>
-              <div class="event-date">${date}</div>
-              <div class="event-description">${description}</div>
-            </div>
-          `;
-          eventContainer.insertAdjacentHTML("beforeend", eventHTML);
-          count++;
-        });
-      } catch (error) {
-        document.getElementById("events").innerText = "Failed to load events.";
-        console.error("Error fetching or parsing RSS feed:", error);
-      }
+        const eventHTML = `
+          <div class="event">
+            <div class="event-title">${title}</div>
+            <div class="event-date">[diagnostic] check console</div>
+            <div class="event-description"><pre>${rawDescription}</pre></div>
+          </div>
+        `;
+        eventContainer.insertAdjacentHTML("beforeend", eventHTML);
+        count++;
+      });
+    } catch (error) {
+      document.getElementById("events").innerText = "Failed to load events.";
+      console.error("Error fetching or parsing RSS feed:", error);
     }
+  }
 
-    loadEvents();
-  </script>
+  loadEvents();
+</script>
 </body>
 </html>
