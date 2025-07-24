@@ -63,16 +63,18 @@
         tempDiv.innerHTML = item.description;
         const text = tempDiv.textContent;
 
-        // Extract parts using plain text patterns
+        // Extract date and time
         const dateMatch = text.match(/Event dates?:\s*([^\n]+)/i);
         const timeMatch = text.match(/Event Time:\s*([^\n]+)/i);
-        const locationMatch = text.match(/Location:\s*([^\n]+)/i);
+
+        // Extract location and remove city/state/ZIP
+        const locationRawMatch = text.match(/Location:\s*([^\n]+)/i);
+        const location = locationRawMatch ? locationRawMatch[1].split('\n')[0].trim() : "";
 
         const date = dateMatch ? dateMatch[1].trim() : "Unknown date";
         const time = timeMatch ? timeMatch[1].trim() : "";
-        const location = locationMatch ? locationMatch[1].trim() : "";
 
-        const extraDetails = [time, location].filter(x => x).join(" • ");
+        const extraDetails = [time, location].filter(Boolean).join(" • ");
 
         const eventHTML = `
           <div class="event">
@@ -92,6 +94,7 @@
 
   loadEvents();
 </script>
+
 
 </body>
 </html>
