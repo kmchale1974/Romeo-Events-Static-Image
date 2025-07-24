@@ -13,13 +13,31 @@
       width: 100%;
       background: #f8f8f8;
       overflow: hidden;
+      font-family: Arial, sans-serif;
     }
 
     #zoom-container {
       width: 1080px;
       height: 1920px;
-      zoom: calc(100vh / 1920); /* Ensures entire content scales to Yodeck widget height */
+      zoom: calc(100vh / 1920);
       transform-origin: top left;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide-container {
+      display: flex;
+      width: 2160px; /* two pages side-by-side */
+      height: 100%;
+      transition: transform 1s ease-in-out;
+    }
+
+    .page {
+      width: 1080px;
+      height: 100%;
+      flex-shrink: 0;
+      padding: 0 40px;
+      overflow-y: auto;
     }
 
     h1 {
@@ -27,13 +45,6 @@
       color: #004A8F;
       font-size: 36px;
       margin: 20px 0;
-    }
-
-    #scroll-wrapper {
-      height: 1700px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: 0 40px;
     }
 
     table {
@@ -52,6 +63,7 @@
       border-left: 5px solid #004A8F;
       padding: 15px;
       box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      margin-bottom: 10px;
     }
 
     .event-title {
@@ -66,7 +78,7 @@
       line-height: 1.4;
     }
 
-    #scroll-wrapper::-webkit-scrollbar {
+    .page::-webkit-scrollbar {
       width: 0;
       background: transparent;
     }
@@ -74,9 +86,9 @@
 </head>
 <body>
   <div id="zoom-container">
-    <h1>Upcoming Romeoville Events</h1>
-    <div id="scroll-wrapper">
-      <table id="event-table" cellspacing="0"></table>
+    <div class="slide-container" id="slider">
+      <div class="page" id="page1"><h1>Upcoming Events (1–10)</h1><table id="table1"></table></div>
+      <div class="page" id="page2"><h1>Upcoming Events (11–20)</h1><table id="table2"></table></div>
     </div>
   </div>
 
@@ -88,45 +100,47 @@
       try {
         const response = await fetch(proxyUrl);
         const data = await response.json();
+        const items = data.items.slice(0, 20); // Up to 20 events
 
-        const table = document.getElementById("event-table");
-        table.innerHTML = "";
+        const cleanedEvents = items.map(item => {
+          let desc = item.description
+            .replace(/<strong>\s*Location:\s*<\/strong>\s*<br\s*\/?>/i, '<strong>Location:</strong> ')
+            .replace(/<br\s*\/?>\s*Romeoville,\s*IL\s*\d{5}/i, '');
 
-        const events = [];
-        const maxItems = Math.min(data.items.length, 20);
-
-        data.items.slice(0, maxItems).forEach((item) => {
-          let rawHTML = item.description;
-
-          rawHTML = rawHTML.replace(/<strong>\s*Location:\s*<\/strong>\s*<br\s*\/?>/i, '<strong>Location:</strong> ');
-          rawHTML = rawHTML.replace(/<br\s*\/?>\s*Romeoville,\s*IL\s*\d{5}/i, '');
-
-          const html = `
+          return `
             <div class="event">
               <div class="event-title">${item.title}</div>
-              <div class="event-description">${rawHTML}</div>
+              <div class="event-description">${desc}</div>
             </div>
           `;
-
-          events.push(html);
         });
 
-        const numColumns = 2;
-        const numRows = Math.ceil(events.length / numColumns);
-
-        for (let i = 0; i < numRows; i++) {
-          const row = document.createElement("tr");
-          for (let j = 0; j < numColumns; j++) {
-            const td = document.createElement("td");
-            const eventIndex = i + j * numRows;
-            td.innerHTML = events[eventIndex] || "";
-            row.appendChild(td);
+        const columnize = (events) => {
+          const rows = Math.ceil(events.length / 2);
+          const html = [];
+          for (let i = 0; i < rows; i++) {
+            html.push('<tr>');
+            for (let j = 0; j < 2; j++) {
+              const idx = i + j * rows;
+              html.push(`<td>${events[idx] || ""}</td>`);
+            }
+            html.push('</tr>');
           }
-          table.appendChild(row);
-        }
-      } catch (error) {
-        document.getElementById("scroll-wrapper").innerText = "Failed to load events.";
-        console.error("Error loading events:", error);
+          return html.join('');
+        };
+
+        document.getElementById("table1").innerHTML = columnize(cleanedEvents.slice(0, 10));
+        document.getElementById("table2").innerHTML = columnize(cleanedEvents.slice(10, 20));
+
+        // Start slideshow
+        let page = 0;
+        setInterval(() => {
+          page = (page + 1) % 2;
+          document.getElementById("slider").style.transform = `translateX(-${page * 1080}px)`;
+        }, 20000); // 20 seconds
+      } catch (err) {
+        document.getElementById("page1").innerHTML = "Failed to load events.";
+        console.error("RSS fetch error:", err);
       }
     }
 
