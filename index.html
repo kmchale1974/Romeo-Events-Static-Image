@@ -53,51 +53,34 @@
       const eventContainer = document.getElementById("events");
       eventContainer.innerHTML = "";
 
-      let count = 0;
-      data.items.forEach(item => {
-        if (count >= 5) return;
-
-        const title = item.title || "No title";
-
-        // Create a temporary element to decode and parse the HTML description
+      data.items.forEach((item, idx) => {
+        if (idx >= 5) return;
+        console.group(`Event #${idx + 1}: ${item.title}`);
         const tempDiv = document.createElement("div");
         tempDiv.innerHTML = item.description;
+        console.log("Parsed HTML:", tempDiv);
 
-        // Find all <strong> elements to locate "Event date:"
-        const strongs = tempDiv.querySelectorAll("strong");
-        let date = "Unknown date";
+        console.log("Strong tags:", Array.from(tempDiv.querySelectorAll("strong")).map(s => s.textContent));
+        console.log("Full text content:", tempDiv.textContent);
 
-        strongs.forEach(strong => {
-          if (strong.textContent.trim().toLowerCase() === "event date:") {
-            const nextNode = strong.nextSibling;
-            if (nextNode && nextNode.nodeType === Node.TEXT_NODE) {
-              date = nextNode.textContent.trim();
-            }
-          }
-        });
-
-        // Remove the line containing Event date from final description
-        const fullText = tempDiv.textContent;
-        const description = fullText.replace(/Event date:\s*.+(\r?\n)?/i, "").trim();
-
-        const eventHTML = `
+        console.groupEnd();
+        
+        // Temporarily just show raw HTML for now:
+        eventContainer.insertAdjacentHTML("beforeend", `
           <div class="event">
-            <div class="event-title">${title}</div>
-            <div class="event-date">${date}</div>
-            <div class="event-description">${description}</div>
+            <div class="event-title">${item.title}</div>
+            <div class="event-date">–</div>
+            <div class="event-description"><pre>${item.description}</pre></div>
           </div>
-        `;
-        eventContainer.insertAdjacentHTML("beforeend", eventHTML);
-        count++;
+        `);
       });
-    } catch (error) {
-      document.getElementById("events").innerText = "Failed to load events.";
-      console.error("Error fetching or parsing RSS feed:", error);
+    } catch (err) {
+      console.error("Fetch error:", err);
     }
   }
-
   loadEvents();
 </script>
+
 
 </body>
 </html>
