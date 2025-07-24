@@ -58,14 +58,12 @@
         if (count >= 5) return;
 
         const title = item.title || "No title";
-
-        // Clean the feed's description, but keep the <strong> and <br> formatting
         let rawHTML = item.description;
 
-        // Remove second line of address (e.g., "Romeoville, IL 60446")
-        rawHTML = rawHTML.replace(/<br\s*\/?>\s*Romeoville, IL \d{5}/i, "");
+        // Fix: Move address inline with "Location:"
+        rawHTML = rawHTML.replace(/<strong>Location:<\/strong>\s*([^<]*)<br\s*\/?>\s*Romeoville, IL \d{5}/i,
+                                  '<strong>Location:</strong> $1');
 
-        // Create the final card using preserved HTML
         const eventHTML = `
           <div class="event">
             <div class="event-title">${title}</div>
@@ -83,6 +81,7 @@
 
   loadEvents();
 </script>
+
 
 </body>
 </html>
