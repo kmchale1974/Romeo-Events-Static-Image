@@ -15,31 +15,11 @@
       overflow: hidden;
     }
 
-    #scaler {
+    #zoom-container {
       width: 1080px;
       height: 1920px;
+      zoom: calc(100vh / 1920); /* Ensures entire content scales to Yodeck widget height */
       transform-origin: top left;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-
-    /* Fit full width and scale based on available Yodeck container size */
-    @media screen {
-      body {
-        display: flex;
-        align-items: flex-start;
-        justify-content: flex-start;
-      }
-
-      #scaler {
-        transform: scale(calc(100vw / 1080));
-      }
-    }
-
-    body, #scaler * {
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
     }
 
     h1 {
@@ -93,7 +73,7 @@
   </style>
 </head>
 <body>
-  <div id="scaler">
+  <div id="zoom-container">
     <h1>Upcoming Romeoville Events</h1>
     <div id="scroll-wrapper">
       <table id="event-table" cellspacing="0"></table>
