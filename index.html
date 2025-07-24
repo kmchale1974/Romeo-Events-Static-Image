@@ -20,15 +20,21 @@
     margin-bottom: 20px;
   }
 
-  #events {
-    column-count: 2;
-    column-gap: 40px;
+  #columns {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
     max-width: 1200px;
     margin: 0 auto;
   }
 
+  .column {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
   .event {
-    break-inside: avoid;
     background: #fff;
     border-left: 5px solid #004A8F;
     padding: 15px;
@@ -51,54 +57,52 @@
 </head>
 <body>
   <h1>Upcoming Romeoville Events</h1>
-  <div id="events">Loading events...</div>
+  <div id="columns">
+  <div class="column" id="column1"></div>
+  <div class="column" id="column2"></div>
+</div>
 
   <script>
-    async function loadEvents() {
-      const rssUrl = "https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml";
-      const proxyUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
+  async function loadEvents() {
+    const rssUrl = "https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml";
+    const proxyUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
 
-      try {
-        const response = await fetch(proxyUrl);
-        const data = await response.json();
-        const eventContainer = document.getElementById("events");
-        eventContainer.innerHTML = "";
+    try {
+      const response = await fetch(proxyUrl);
+      const data = await response.json();
+      const events = [];
 
-        let count = 0;
-        data.items.forEach(item => {
-          if (count >= 10) return;
+      // Extract and clean up each item
+      data.items.slice(0, 10).forEach(item => {
+        let rawHTML = item.description;
 
-          const title = item.title || "No title";
-          let rawHTML = item.description;
+        // Fix formatting for Yodeck
+        rawHTML = rawHTML.replace(/<strong>\s*Location:\s*<\/strong>\s*<br\s*\/?>/i, '<strong>Location:</strong> ');
+        rawHTML = rawHTML.replace(/<br\s*\/?>\s*Romeoville,\s*IL\s*\d{5}/i, '');
 
-          // Remove <br> directly after "Location:"
-          rawHTML = rawHTML.replace(
-            /<strong>\s*Location:\s*<\/strong>\s*<br\s*\/?>/i,
-            '<strong>Location:</strong> '
-          );
+        const html = `
+          <div class="event">
+            <div class="event-title">${item.title}</div>
+            <div class="event-description">${rawHTML}</div>
+          </div>
+        `;
+        events.push(html);
+      });
 
-          // Remove the city/state/ZIP line (Romeoville, IL ZIP)
-          rawHTML = rawHTML.replace(
-            /<br\s*\/?>\s*Romeoville,\s*IL\s*\d{5}/i,
-            ''
-          );
+      // Divide into two columns
+      const column1 = document.getElementById("column1");
+      const column2 = document.getElementById("column2");
 
-          const eventHTML = `
-            <div class="event">
-              <div class="event-title">${title}</div>
-              <div class="event-description">${rawHTML}</div>
-            </div>
-          `;
-          eventContainer.insertAdjacentHTML("beforeend", eventHTML);
-          count++;
-        });
-      } catch (error) {
-        document.getElementById("events").innerText = "Failed to load events.";
-        console.error("Error fetching or parsing RSS feed:", error);
-      }
+      events.slice(0, 5).forEach(html => column1.insertAdjacentHTML("beforeend", html));
+      events.slice(5, 10).forEach(html => column2.insertAdjacentHTML("beforeend", html));
+
+    } catch (error) {
+      document.getElementById("columns").innerText = "Failed to load events.";
+      console.error("Error loading events:", error);
     }
+  }
 
-    loadEvents();
-  </script>
+  loadEvents();
+</script>
 </body>
 </html>
