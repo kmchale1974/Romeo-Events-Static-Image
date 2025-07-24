@@ -53,34 +53,45 @@
       const eventContainer = document.getElementById("events");
       eventContainer.innerHTML = "";
 
-      data.items.forEach((item, idx) => {
-        if (idx >= 5) return;
-        console.group(`Event #${idx + 1}: ${item.title}`);
+      let count = 0;
+      data.items.forEach(item => {
+        if (count >= 5) return;
+
+        const title = item.title || "No title";
+
         const tempDiv = document.createElement("div");
         tempDiv.innerHTML = item.description;
-        console.log("Parsed HTML:", tempDiv);
+        const text = tempDiv.textContent;
 
-        console.log("Strong tags:", Array.from(tempDiv.querySelectorAll("strong")).map(s => s.textContent));
-        console.log("Full text content:", tempDiv.textContent);
+        // Extract parts using plain text patterns
+        const dateMatch = text.match(/Event dates?:\s*([^\n]+)/i);
+        const timeMatch = text.match(/Event Time:\s*([^\n]+)/i);
+        const locationMatch = text.match(/Location:\s*([^\n]+)/i);
 
-        console.groupEnd();
-        
-        // Temporarily just show raw HTML for now:
-        eventContainer.insertAdjacentHTML("beforeend", `
+        const date = dateMatch ? dateMatch[1].trim() : "Unknown date";
+        const time = timeMatch ? timeMatch[1].trim() : "";
+        const location = locationMatch ? locationMatch[1].trim() : "";
+
+        const extraDetails = [time, location].filter(x => x).join(" • ");
+
+        const eventHTML = `
           <div class="event">
-            <div class="event-title">${item.title}</div>
-            <div class="event-date">–</div>
-            <div class="event-description"><pre>${item.description}</pre></div>
+            <div class="event-title">${title}</div>
+            <div class="event-date">${date}</div>
+            <div class="event-description">${extraDetails}</div>
           </div>
-        `);
+        `;
+        eventContainer.insertAdjacentHTML("beforeend", eventHTML);
+        count++;
       });
-    } catch (err) {
-      console.error("Fetch error:", err);
+    } catch (error) {
+      document.getElementById("events").innerText = "Failed to load events.";
+      console.error("Error fetching or parsing RSS feed:", error);
     }
   }
+
   loadEvents();
 </script>
-
 
 </body>
 </html>
