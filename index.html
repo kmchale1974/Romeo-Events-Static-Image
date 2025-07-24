@@ -59,28 +59,17 @@
 
         const title = item.title || "No title";
 
-        const tempDiv = document.createElement("div");
-        tempDiv.innerHTML = item.description;
-        const text = tempDiv.textContent;
+        // Clean the feed's description, but keep the <strong> and <br> formatting
+        let rawHTML = item.description;
 
-        // Extract date and time
-        const dateMatch = text.match(/Event dates?:\s*([^\n]+)/i);
-        const timeMatch = text.match(/Event Time:\s*([^\n]+)/i);
+        // Remove second line of address (e.g., "Romeoville, IL 60446")
+        rawHTML = rawHTML.replace(/<br\s*\/?>\s*Romeoville, IL \d{5}/i, "");
 
-        // Extract location and remove city/state/ZIP
-        const locationRawMatch = text.match(/Location:\s*([^\n]+)/i);
-        const location = locationRawMatch ? locationRawMatch[1].split('\n')[0].trim() : "";
-
-        const date = dateMatch ? dateMatch[1].trim() : "Unknown date";
-        const time = timeMatch ? timeMatch[1].trim() : "";
-
-        const extraDetails = [time, location].filter(Boolean).join(" • ");
-
+        // Create the final card using preserved HTML
         const eventHTML = `
           <div class="event">
             <div class="event-title">${title}</div>
-            <div class="event-date">${date}</div>
-            <div class="event-description">${extraDetails}</div>
+            <div class="event-description">${rawHTML}</div>
           </div>
         `;
         eventContainer.insertAdjacentHTML("beforeend", eventHTML);
@@ -94,7 +83,6 @@
 
   loadEvents();
 </script>
-
 
 </body>
 </html>
