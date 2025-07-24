@@ -95,52 +95,57 @@
   <script>
     async function loadEvents() {
       const rssUrl = "https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml";
-      const proxyUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
+      const response = await fetch(rssUrl);
+      const text = await response.text();
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(text, "text/xml");
+      const items = Array.from(xml.querySelectorAll("item"));
 
-      try {
-        const response = await fetch(proxyUrl);
-        const data = await response.json();
-        const items = data.items.slice(0, 20); // max 20 events
+      const events = items.slice(0, 20).map(item => {
+        const title = item.querySelector("title")?.textContent || "";
+        const descRaw = item.querySelector("description")?.textContent || "";
+        const descHTML = new DOMParser().parseFromString(descRaw, "text/html").body;
+        const strongTags = descHTML.querySelectorAll("strong");
 
-        const cleanedEvents = items.map(item => {
-          let desc = item.description
-            .replace(/<strong>\s*Location:\s*<\/strong>\s*<br\s*\/?>/i, '<strong>Location:</strong> ')
-            .replace(/<br\s*\/?>\s*Romeoville,\s*IL\s*\d{5}/i, '');
-          return `
-            <div class="event">
-              <div class="event-title">${item.title}</div>
-              <div class="event-description">${desc}</div>
-            </div>
-          `;
+        strongTags.forEach(strong => {
+          if (strong.textContent.includes("Location:")) {
+            const next = strong.nextSibling;
+            if (next?.nodeValue?.includes("Romeoville")) {
+              next.nodeValue = next.nodeValue.replace(/Romeoville, IL \d{5}/, "").trim();
+            }
+          }
         });
 
-        const columnize = (events) => {
-          const rows = Math.ceil(events.length / 2);
-          let html = "";
-          for (let i = 0; i < rows; i++) {
-            html += "<tr>";
-            for (let j = 0; j < 2; j++) {
-              const index = i + j * rows;
-              html += `<td>${events[index] || ""}</td>`;
-            }
-            html += "</tr>";
+        return `
+          <div class="event">
+            <div class="event-title">${title}</div>
+            <div class="event-description">${descHTML.innerHTML}</div>
+          </div>
+        `;
+      });
+
+      function columnize(events) {
+        const rows = Math.ceil(events.length / 2);
+        let html = "";
+        for (let i = 0; i < rows; i++) {
+          html += "<tr>";
+          for (let j = 0; j < 2; j++) {
+            const index = i + j * rows;
+            html += `<td>${events[index] || ""}</td>`;
           }
-          return html;
-        };
-
-        document.getElementById("table1").innerHTML = columnize(cleanedEvents.slice(0, 10));
-        document.getElementById("table2").innerHTML = columnize(cleanedEvents.slice(10, 20));
-
-        // Slide animation
-        let currentPage = 0;
-        setInterval(() => {
-          currentPage = (currentPage + 1) % 2;
-          document.getElementById("slider").style.transform = `translateX(-${currentPage * 1080}px)`;
-        }, 20000); // every 20 seconds
-      } catch (error) {
-        document.getElementById("table1").innerHTML = "<tr><td>Error loading events.</td></tr>";
-        console.error("RSS error:", error);
+          html += "</tr>";
+        }
+        return html;
       }
+
+      document.getElementById("table1").innerHTML = columnize(events.slice(0, 10));
+      document.getElementById("table2").innerHTML = columnize(events.slice(10, 20));
+
+      let currentPage = 0;
+      setInterval(() => {
+        currentPage = (currentPage + 1) % 2;
+        document.getElementById("slider").style.transform = `translateX(-${currentPage * 1080}px)`;
+      }, 20000);
     }
 
     loadEvents();
