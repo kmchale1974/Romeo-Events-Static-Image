@@ -44,25 +44,24 @@
   <script>
     async function loadEvents() {
       const rssUrl = "https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml";
-      const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(rssUrl);
+      const proxyUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
       const response = await fetch(proxyUrl);
       const data = await response.json();
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(data.contents, "text/xml");
-      const items = xml.querySelectorAll("item");
 
       const eventContainer = document.getElementById("events");
       eventContainer.innerHTML = "";
 
       let count = 0;
-      items.forEach(item => {
+      data.items.forEach(item => {
         if (count >= 5) return;
-        const title = item.querySelector("title")?.textContent || "No title";
-        const summaryHTML = item.querySelector("description")?.textContent || "";
+
+        const title = item.title || "No title";
         const tempDiv = document.createElement("div");
-        tempDiv.innerHTML = summaryHTML;
-        const dateMatch = summaryHTML.match(/Event date: (.+?)<\/strong>/i);
+        tempDiv.innerHTML = item.description;
+
+        const dateMatch = item.description.match(/Event date:\s*([\w\s,0-9]+)/i);
         const date = dateMatch ? dateMatch[1] : "Unknown date";
+
         const description = tempDiv.textContent.replace(/Event date:.+/, "").trim();
 
         const eventHTML = `
