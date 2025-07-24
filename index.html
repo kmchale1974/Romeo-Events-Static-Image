@@ -93,19 +93,18 @@
   </div>
 
   <script>
-    async function loadEvents() {
-      const rssUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent("https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml");
-      const response = await fetch(rssUrl);
-      const data = await response.json();
-      const text = data.contents;
+  async function loadEvents() {
+    const rssFeedUrl = "https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml";
+    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssFeedUrl)}`;
 
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(text, "text/xml");
-      const items = Array.from(xml.querySelectorAll("item"));
+    try {
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      const items = data.items || [];
 
       const events = items.slice(0, 20).map(item => {
-        const title = item.querySelector("title")?.textContent || "";
-        const descRaw = item.querySelector("description")?.textContent || "";
+        const title = item.title;
+        const descRaw = item.description;
 
         let eventHTML = "<em>No description available</em>";
         try {
@@ -156,9 +155,14 @@
         currentPage = (currentPage + 1) % 2;
         document.getElementById("slider").style.transform = `translateX(-${currentPage * 1080}px)`;
       }, 20000);
-    }
 
-    loadEvents();
-  </script>
+    } catch (err) {
+      console.error("Failed to load events:", err);
+    }
+  }
+
+  loadEvents();
+</script>
+
 </body>
 </html>
