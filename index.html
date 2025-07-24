@@ -59,14 +59,26 @@
 
         const title = item.title || "No title";
 
-        const cleanHTML = item.description.replace(/<br\s*\/?>/gi, "\n");
+        // Create a temporary element to decode and parse the HTML description
         const tempDiv = document.createElement("div");
-        tempDiv.innerHTML = cleanHTML;
+        tempDiv.innerHTML = item.description;
 
-        const dateMatch = item.description.match(/<strong>Event date:<\/strong>\s*([\w\s,–-]+)<br\s*\/?>/i);
-        const date = dateMatch ? dateMatch[1].trim() : "Unknown date";
+        // Find all <strong> elements to locate "Event date:"
+        const strongs = tempDiv.querySelectorAll("strong");
+        let date = "Unknown date";
 
-        const description = tempDiv.textContent.replace(/Event date:.+\n?/i, "").trim();
+        strongs.forEach(strong => {
+          if (strong.textContent.trim().toLowerCase() === "event date:") {
+            const nextNode = strong.nextSibling;
+            if (nextNode && nextNode.nodeType === Node.TEXT_NODE) {
+              date = nextNode.textContent.trim();
+            }
+          }
+        });
+
+        // Remove the line containing Event date from final description
+        const fullText = tempDiv.textContent;
+        const description = fullText.replace(/Event date:\s*.+(\r?\n)?/i, "").trim();
 
         const eventHTML = `
           <div class="event">
