@@ -60,12 +60,17 @@
         const title = item.title || "No title";
         let rawHTML = item.description;
 
-        // 1. Remove city/state/ZIP (2nd line of address)
-        rawHTML = rawHTML.replace(/<br\s*\/?>\s*Romeoville, IL \d{5}/i, "");
+        // ✅ Remove <br> directly after "Location:"
+        rawHTML = rawHTML.replace(
+          /<strong>\s*Location:\s*<\/strong>\s*<br\s*\/?>/i,
+          '<strong>Location:</strong> '
+        );
 
-        // 2. Remove <br> that appears immediately after <strong>Location:</strong>
-        rawHTML = rawHTML.replace(/<strong>Location:<\/strong>\s*<br\s*\/?>/i,
-                                  '<strong>Location:</strong> ');
+        // ✅ Remove the city/state/ZIP line (even with or without <br>)
+        rawHTML = rawHTML.replace(
+          /<br\s*\/?>\s*Romeoville,\s*IL\s*\d{5}/i,
+          ''
+        );
 
         const eventHTML = `
           <div class="event">
@@ -84,7 +89,6 @@
 
   loadEvents();
 </script>
-
 
 </body>
 </html>
