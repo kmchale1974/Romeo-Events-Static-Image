@@ -6,45 +6,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Romeoville Events</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f8f8f8;
-      color: #333;
-      margin: 0;
-      padding: 20px;
-    }
+  body {
+    font-family: Arial, sans-serif;
+    background: #f8f8f8;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+  }
 
-    h1 {
-      text-align: center;
-      color: #004A8F;
-      margin-bottom: 20px;
-    }
+  h1 {
+    text-align: center;
+    color: #004A8F;
+    margin-bottom: 20px;
+  }
 
-    #events {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-    }
+  #events {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* exactly 2 columns */
+    grid-template-rows: repeat(5, auto); /* 5 rows */
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 
-    .event {
-      background: #fff;
-      border-left: 5px solid #004A8F;
-      padding: 15px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.05);
-    }
+  .event {
+    background: #fff;
+    border-left: 5px solid #004A8F;
+    padding: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    overflow: hidden;
+  }
 
-    .event-title {
-      font-size: 1.1em;
-      font-weight: bold;
-      margin-bottom: 8px;
-      color: #222;
-    }
+  .event-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #222;
+  }
 
-    .event-description {
-      font-size: 0.95em;
-      line-height: 1.4;
-    }
-  </style>
+  .event-description {
+    font-size: 0.95em;
+    line-height: 1.4;
+  }
+</style>
 </head>
 <body>
   <h1>Upcoming Romeoville Events</h1>
