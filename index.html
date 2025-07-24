@@ -60,9 +60,12 @@
         const title = item.title || "No title";
         let rawHTML = item.description;
 
-        // Fix: Move address inline with "Location:"
-        rawHTML = rawHTML.replace(/<strong>Location:<\/strong>\s*([^<]*)<br\s*\/?>\s*Romeoville, IL \d{5}/i,
-                                  '<strong>Location:</strong> $1');
+        // 1. Remove city/state/ZIP (2nd line of address)
+        rawHTML = rawHTML.replace(/<br\s*\/?>\s*Romeoville, IL \d{5}/i, "");
+
+        // 2. Remove <br> that appears immediately after <strong>Location:</strong>
+        rawHTML = rawHTML.replace(/<strong>Location:<\/strong>\s*<br\s*\/?>/i,
+                                  '<strong>Location:</strong> ');
 
         const eventHTML = `
           <div class="event">
