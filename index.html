@@ -6,42 +6,65 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Romeoville Events</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f8f8f8;
-      color: #333;
+    html, body {
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background: #f8f8f8;
+      overflow: hidden;
+    }
+
+    #scaler {
+      width: 1080px;
+      height: 1920px;
+      transform-origin: top left;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* Fit full width and scale based on available Yodeck container size */
+    @media screen {
+      body {
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+
+      #scaler {
+        transform: scale(calc(100vw / 1080));
+      }
+    }
+
+    body, #scaler * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
     }
 
     h1 {
       text-align: center;
       color: #004A8F;
-      margin-bottom: 20px;
+      font-size: 36px;
+      margin: 20px 0;
     }
 
     #scroll-wrapper {
-      max-height: 1720px; /* Adjust if this region shares space with other Yodeck widgets */
+      height: 1700px;
       overflow-y: auto;
       overflow-x: hidden;
-    }
-
-    #scroll-wrapper::-webkit-scrollbar {
-      width: 0;
-      background: transparent;
+      padding: 0 40px;
     }
 
     table {
       width: 100%;
-      max-width: 1000px;
-      margin: 0 auto;
       table-layout: fixed;
     }
 
     td {
       vertical-align: top;
       width: 50%;
-      padding: 10px;
+      padding: 15px;
     }
 
     .event {
@@ -52,22 +75,29 @@
     }
 
     .event-title {
-      font-size: 1.1em;
+      font-size: 1.2em;
       font-weight: bold;
       margin-bottom: 8px;
       color: #222;
     }
 
     .event-description {
-      font-size: 0.95em;
+      font-size: 1em;
       line-height: 1.4;
+    }
+
+    #scroll-wrapper::-webkit-scrollbar {
+      width: 0;
+      background: transparent;
     }
   </style>
 </head>
 <body>
-  <h1>Upcoming Romeoville Events</h1>
-  <div id="scroll-wrapper">
-    <table id="event-table" cellspacing="0"></table>
+  <div id="scaler">
+    <h1>Upcoming Romeoville Events</h1>
+    <div id="scroll-wrapper">
+      <table id="event-table" cellspacing="0"></table>
+    </div>
   </div>
 
   <script>
@@ -83,12 +113,11 @@
         table.innerHTML = "";
 
         const events = [];
-        const maxItems = Math.min(data.items.length, 20); // Change to 30 or more if needed
+        const maxItems = Math.min(data.items.length, 20);
 
-        data.items.slice(0, maxItems).forEach((item, index) => {
+        data.items.slice(0, maxItems).forEach((item) => {
           let rawHTML = item.description;
 
-          // Clean up formatting
           rawHTML = rawHTML.replace(/<strong>\s*Location:\s*<\/strong>\s*<br\s*\/?>/i, '<strong>Location:</strong> ');
           rawHTML = rawHTML.replace(/<br\s*\/?>\s*Romeoville,\s*IL\s*\d{5}/i, '');
 
@@ -102,7 +131,6 @@
           events.push(html);
         });
 
-        // Build rows to fill 2 columns, row by row (column-major)
         const numColumns = 2;
         const numRows = Math.ceil(events.length / numColumns);
 
