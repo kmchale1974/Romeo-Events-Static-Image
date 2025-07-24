@@ -5,38 +5,46 @@
   <meta http-equiv="refresh" content="86400"> <!-- Refresh once per day -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Romeoville Events</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f8f8f8;
-      color: #333;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-      color: #004A8F;
-    }
-    .event {
-      background: #fff;
-      border-left: 5px solid #004A8F;
-      margin-bottom: 20px;
-      padding: 15px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    .event-title {
-      font-size: 1.2em;
-      margin-bottom: 8px;
-      color: #222;
-    }
-    .event-date {
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-    .event-description {
-      font-size: 0.95em;
-      white-space: pre-wrap;
-    }
-  </style>
+ <style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f8f8f8;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+  }
+
+  h1 {
+    text-align: center;
+    color: #004A8F;
+    margin-bottom: 20px;
+  }
+
+  #events {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .event {
+    background: #fff;
+    border-left: 5px solid #004A8F;
+    padding: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  }
+
+  .event-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #222;
+  }
+
+  .event-description {
+    font-size: 0.95em;
+    line-height: 1.4;
+  }
+</style>
 </head>
 <body>
   <h1>Upcoming Romeoville Events</h1>
