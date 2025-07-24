@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="86400"> <!-- Refresh once per day -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Romeoville Events</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f8f8;
+      color: #333;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #004A8F;
+    }
+    .event {
+      background: #fff;
+      border-left: 5px solid #004A8F;
+      margin-bottom: 20px;
+      padding: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .event-title {
+      font-size: 1.2em;
+      margin-bottom: 8px;
+      color: #222;
+    }
+    .event-date {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .event-description {
+      font-size: 0.95em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Upcoming Romeoville Events</h1>
+  <div id="events">Loading events...</div>
+
+  <script>
+    async function loadEvents() {
+      const rssUrl = "https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml";
+      const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(rssUrl);
+      const response = await fetch(proxyUrl);
+      const data = await response.json();
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(data.contents, "text/xml");
+      const items = xml.querySelectorAll("item");
+
+      const eventContainer = document.getElementById("events");
+      eventContainer.innerHTML = "";
+
+      let count = 0;
+      items.forEach(item => {
+        if (count >= 5) return;
+        const title = item.querySelector("title")?.textContent || "No title";
+        const summaryHTML = item.querySelector("description")?.textContent || "";
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = summaryHTML;
+        const dateMatch = summaryHTML.match(/Event date: (.+?)<\/strong>/i);
+        const date = dateMatch ? dateMatch[1] : "Unknown date";
+        const description = tempDiv.textContent.replace(/Event date:.+/, "").trim();
+
+        const eventHTML = `
+          <div class="event">
+            <div class="event-title">${title}</div>
+            <div class="event-date">${date}</div>
+            <div class="event-description">${description}</div>
+          </div>
+        `;
+        eventContainer.insertAdjacentHTML("beforeend", eventHTML);
+        count++;
+      });
+    }
+
+    loadEvents();
+  </script>
+</body>
+</html>
