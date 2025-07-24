@@ -2,101 +2,100 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="86400"> <!-- Refresh once per day -->
+  <meta http-equiv="refresh" content="86400" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Romeoville Events</title>
- <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f8f8f8;
-    color: #333;
-    margin: 0;
-    padding: 20px;
-  }
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f8f8;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
 
-  h1 {
-    text-align: center;
-    color: #004A8F;
-    margin-bottom: 20px;
-  }
+    h1 {
+      text-align: center;
+      color: #004A8F;
+      margin-bottom: 20px;
+    }
 
-  #events {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
+    #events {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
 
-  .event {
-    background: #fff;
-    border-left: 5px solid #004A8F;
-    padding: 15px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.05);
-  }
+    .event {
+      background: #fff;
+      border-left: 5px solid #004A8F;
+      padding: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
 
-  .event-title {
-    font-size: 1.1em;
-    font-weight: bold;
-    margin-bottom: 8px;
-    color: #222;
-  }
+    .event-title {
+      font-size: 1.1em;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #222;
+    }
 
-  .event-description {
-    font-size: 0.95em;
-    line-height: 1.4;
-  }
-</style>
+    .event-description {
+      font-size: 0.95em;
+      line-height: 1.4;
+    }
+  </style>
 </head>
 <body>
   <h1>Upcoming Romeoville Events</h1>
   <div id="events">Loading events...</div>
 
-<script>
-  async function loadEvents() {
-    const rssUrl = "https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml";
-    const proxyUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
+  <script>
+    async function loadEvents() {
+      const rssUrl = "https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml";
+      const proxyUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
 
-    try {
-      const response = await fetch(proxyUrl);
-      const data = await response.json();
-      const eventContainer = document.getElementById("events");
-      eventContainer.innerHTML = "";
+      try {
+        const response = await fetch(proxyUrl);
+        const data = await response.json();
+        const eventContainer = document.getElementById("events");
+        eventContainer.innerHTML = "";
 
-      let count = 0;
-      data.items.forEach(item => {
-        if (count >= 10) return;
+        let count = 0;
+        data.items.forEach(item => {
+          if (count >= 10) return;
 
-        const title = item.title || "No title";
-        let rawHTML = item.description;
+          const title = item.title || "No title";
+          let rawHTML = item.description;
 
-        // ✅ Remove <br> directly after "Location:"
-        rawHTML = rawHTML.replace(
-          /<strong>\s*Location:\s*<\/strong>\s*<br\s*\/?>/i,
-          '<strong>Location:</strong> '
-        );
+          // Remove <br> directly after "Location:"
+          rawHTML = rawHTML.replace(
+            /<strong>\s*Location:\s*<\/strong>\s*<br\s*\/?>/i,
+            '<strong>Location:</strong> '
+          );
 
-        // ✅ Remove the city/state/ZIP line (even with or without <br>)
-        rawHTML = rawHTML.replace(
-          /<br\s*\/?>\s*Romeoville,\s*IL\s*\d{5}/i,
-          ''
-        );
+          // Remove the city/state/ZIP line (Romeoville, IL ZIP)
+          rawHTML = rawHTML.replace(
+            /<br\s*\/?>\s*Romeoville,\s*IL\s*\d{5}/i,
+            ''
+          );
 
-        const eventHTML = `
-          <div class="event">
-            <div class="event-title">${title}</div>
-            <div class="event-description">${rawHTML}</div>
-          </div>
-        `;
-        eventContainer.insertAdjacentHTML("beforeend", eventHTML);
-        count++;
-      });
-    } catch (error) {
-      document.getElementById("events").innerText = "Failed to load events.";
-      console.error("Error fetching or parsing RSS feed:", error);
+          const eventHTML = `
+            <div class="event">
+              <div class="event-title">${title}</div>
+              <div class="event-description">${rawHTML}</div>
+            </div>
+          `;
+          eventContainer.insertAdjacentHTML("beforeend", eventHTML);
+          count++;
+        });
+      } catch (error) {
+        document.getElementById("events").innerText = "Failed to load events.";
+        console.error("Error fetching or parsing RSS feed:", error);
+      }
     }
-  }
 
-  loadEvents();
-</script>
-
+    loadEvents();
+  </script>
 </body>
 </html>
