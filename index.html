@@ -16,6 +16,7 @@
       height: 960px;
       background: #f8f8f8;
       font-family: Arial, sans-serif;
+      overflow: hidden;
     }
 
     .viewport {
@@ -54,6 +55,7 @@
       grid-template-rows: repeat(5, 1fr);
       gap: 8px;
       flex-grow: 1;
+      overflow: hidden;
     }
 
     .event {
@@ -132,16 +134,24 @@
             console.error("Error parsing description:", e);
           }
 
-          return `
-            <div class="event">
-              <div class="event-title">${title}</div>
-              <div class="event-description">${eventHTML || "<em>No details</em>"}</div>
-            </div>
-          `;
+          return {
+            title: title,
+            description: eventHTML || "<em>No details</em>"
+          };
         });
 
-        document.getElementById("grid1").innerHTML = events.slice(0, 10).join("");
-        document.getElementById("grid2").innerHTML = events.slice(10, 20).join("");
+        const grid1 = document.getElementById("grid1");
+        const grid2 = document.getElementById("grid2");
+        grid1.innerHTML = "";
+        grid2.innerHTML = "";
+
+        events.forEach((evt, idx) => {
+          const div = document.createElement("div");
+          div.className = "event";
+          div.innerHTML = `<div class="event-title">${evt.title}</div><div class="event-description">${evt.description}</div>`;
+          if (idx < 10) grid1.appendChild(div);
+          else grid2.appendChild(div);
+        });
 
         document.getElementById("loading").style.display = "none";
         document.querySelector(".viewport").style.display = "block";
