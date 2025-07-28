@@ -104,10 +104,9 @@
 
   <script>
     async function loadEvents() {
-      const rssUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent("https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml");
+      const rssUrl = "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent("https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml");
       const response = await fetch(rssUrl);
-      const data = await response.json();
-      const text = data.contents;
+      const text = await response.text();
 
       const parser = new DOMParser();
       const xml = parser.parseFromString(text, "text/xml");
