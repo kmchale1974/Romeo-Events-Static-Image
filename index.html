@@ -1,190 +1,103 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="86400" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Romeoville Events</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      font-family: Arial, sans-serif;
-      background: #f8f8f8;
-    }
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  background: #f8f8f8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-    #zoom-container {
-      width: 1080px;
-      height: 960px;
-      transform: scale(0.96);
-      transform-origin: top left;
-      overflow: hidden;
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-    }
+#zoom-container {
+  max-width: 1080px;
+  max-height: 960px;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 1vh;
+}
 
-    .slide-container {
-      display: flex;
-      width: 200vw;
-      height: 100%;
-      transition: transform 1s ease-in-out;
-    }
+.slide-container {
+  display: flex;
+  width: 200%;
+  height: 100%;
+  transition: transform 1s ease-in-out;
+}
 
-    .page {
-      width: 100vw;
-      height: 100vh;
-      flex-shrink: 0;
-      padding: 2vh;
-      box-sizing: border-box;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-    }
+.page {
+  width: 100%;
+  height: 100%;
+  flex-shrink: 0;
+  padding: 2vh;
+  box-sizing: border-box;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
 
-    h1 {
-      text-align: center;
-      color: #004A8F;
-      font-size: 3vh;
-      margin: 1vh 0;
-      flex-shrink: 0;
-    }
+h1 {
+  text-align: center;
+  color: #004A8F;
+  font-size: 3vh;
+  margin: 1vh 0;
+  flex-shrink: 0;
+}
 
-    table {
-      width: 100%;
-      table-layout: fixed;
-      flex-grow: 1;
-    }
+table {
+  width: 100%;
+  table-layout: fixed;
+  flex-grow: 1;
+}
 
-    td {
-      vertical-align: top;
-      width: 50%;
-      padding: 1vh;
-    }
+td {
+  vertical-align: top;
+  width: 50%;
+  padding: 1vh;
+}
 
-    .event {
-      background: #fff;
-      border-left: 5px solid #004A8F;
-      padding: 1.5vh;
-      box-shadow: 0 0 10px rgba(0,0,0,0.05);
-      margin-bottom: 1vh;
-    }
+.event {
+  background: #fff;
+  border-left: 5px solid #004A8F;
+  padding: 1.5vh;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  margin-bottom: 1vh;
+}
 
-    .event-title {
-      font-size: 2.4vh;
-      font-weight: bold;
-      margin-bottom: 0.5vh;
-      color: #222;
-    }
+.event-title {
+  font-size: 2.4vh;
+  font-weight: bold;
+  margin-bottom: 0.5vh;
+  color: #222;
+}
 
-    .event-description {
-      font-size: 2vh;
-      line-height: 1.4;
-    }
+.event-description {
+  font-size: 2vh;
+  line-height: 1.4;
+}
 
-    .page::-webkit-scrollbar {
-      width: 0;
-      background: transparent;
-    }
+.page::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
 
-    #loading {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f8f8f8;
-      z-index: 999;
-      font-size: 2.5vh;
-      color: #666;
-    }
-  </style>
-</head>
-<body>
-  <div id="loading">Loading events…</div>
-  <div id="zoom-container" style="display:none">
-    <div class="slide-container" id="slider">
-      <div class="page"><h1>Upcoming Events (1–10)</h1><table id="table1"></table></div>
-      <div class="page"><h1>Upcoming Events (11–20)</h1><table id="table2"></table></div>
-    </div>
-  </div>
-
-  <script>
-    async function loadEvents() {
-      const rssUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent("https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml");
-      const response = await fetch(rssUrl);
-      const data = await response.json();
-      const text = data.contents;
-
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(text, "text/xml");
-      const items = Array.from(xml.querySelectorAll("item"));
-
-      const events = items.slice(0, 20).map(item => {
-        const title = item.querySelector("title")?.textContent || "";
-        const descRaw = item.querySelector("description")?.textContent || "";
-
-        let eventHTML = "<em>No description available</em>";
-        try {
-          const descHTML = new DOMParser().parseFromString(descRaw, "text/html").body;
-          const strongTags = descHTML.querySelectorAll("strong");
-
-          strongTags.forEach(strong => {
-            if (strong.textContent.includes("Location:")) {
-              const next = strong.nextSibling;
-              if (next?.nodeValue?.includes("Romeoville")) {
-                next.nodeValue = next.nodeValue.replace(/Romeoville, IL \d{5}/, "").trim();
-              }
-            }
-          });
-
-          eventHTML = descHTML.innerHTML;
-        } catch (e) {
-          console.error("Error parsing description", e);
-        }
-
-        return `
-          <div class="event">
-            <div class="event-title">${title}</div>
-            <div class="event-description">${eventHTML}</div>
-          </div>
-        `;
-      });
-
-      function columnize(events) {
-        const rows = Math.ceil(events.length / 2);
-        let html = "";
-        for (let i = 0; i < rows; i++) {
-          html += "<tr>";
-          for (let j = 0; j < 2; j++) {
-            const index = i + j * rows;
-            html += `<td>${events[index] || ""}</td>`;
-          }
-          html += "</tr>";
-        }
-        return html;
-      }
-
-      document.getElementById("table1").innerHTML = columnize(events.slice(0, 10));
-      document.getElementById("table2").innerHTML = columnize(events.slice(10, 20));
-
-      document.getElementById("loading").style.display = "none";
-      document.getElementById("zoom-container").style.display = "flex";
-
-      let currentPage = 0;
-      setInterval(() => {
-        currentPage = (currentPage + 1) % 2;
-        document.getElementById("slider").style.transform = `translateX(-${currentPage * 100}vw)`;
-      }, 20000);
-    }
-
-    window.addEventListener("DOMContentLoaded", loadEvents);
-  </script>
-</body>
-</html>
+#loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f8f8;
+  z-index: 999;
+  font-size: 2.5vh;
+  color: #666;
+}
