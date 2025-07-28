@@ -108,7 +108,7 @@
 
   <script>
     async function loadEvents() {
-      const rssUrl = "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent("https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml");
+     const rssUrl = "https://corsproxy.io/?" + encodeURIComponent("https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml");
       try {
         const response = await fetch(rssUrl);
         const text = await response.text();
