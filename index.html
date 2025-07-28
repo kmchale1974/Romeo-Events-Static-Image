@@ -125,62 +125,62 @@
 
   <script>
     async function loadEvents() {
-      const rssUrl = "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent("https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml");
+  const rssUrl = "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent("https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml");
+  try {
+    const response = await fetch(rssUrl);
+    const text = await response.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, "text/xml");
+    const items = Array.from(xml.querySelectorAll("item"));
+
+    const events = items.slice(0, 20).map(item => {
+      const title = item.querySelector("title")?.textContent || "";
+      const descRaw = item.querySelector("description")?.textContent || "";
+
+      let eventHTML = "<em>No description available</em>";
       try {
-        const response = await fetch(rssUrl);
-        const text = await response.text();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(text, "text/xml");
-        const items = Array.from(xml.querySelectorAll("item"));
+        const descHTML = new DOMParser().parseFromString(descRaw, "text/html").body;
 
-        const events = items.slice(0, 20).map(item => {
-          const title = item.querySelector("title")?.textContent || "";
-          const descRaw = item.querySelector("description")?.textContent || "";
-
-          let eventHTML = "<em>No description available</em>";
-          try {
-            const descHTML = new DOMParser().parseFromString(descRaw, "text/html").body;
-            const strongTags = descHTML.querySelectorAll("strong");
-
-            strongTags.forEach(strong => {
-              if (strong.textContent.includes("Location:")) {
-                const next = strong.nextSibling;
-                if (next?.nodeValue?.includes("Romeoville")) {
-                  next.nodeValue = next.nodeValue.replace(/Romeoville, IL \d{5}/, "").trim();
-                }
-              }
-            });
-
-            eventHTML = descHTML.innerHTML;
-          } catch (e) {
-            console.error("Error parsing description", e);
+        // Strip Romeoville, IL ZIP from any text nodes under strong tags
+        descHTML.querySelectorAll("strong").forEach(strong => {
+          const next = strong.nextSibling;
+          if (strong.textContent.includes("Location:") && next?.nodeType === 3) {
+            next.nodeValue = next.nodeValue.replace(/Romeoville, IL\s*\d{5}/, "").trim();
           }
-
-          return `
-            <div class="event">
-              <div class="event-title">${title}</div>
-              <div class="event-description">${eventHTML}</div>
-            </div>
-          `;
         });
 
-        document.getElementById("grid1").innerHTML = events.slice(0, 10).join("");
-        document.getElementById("grid2").innerHTML = events.slice(10, 20).join("");
-
-        document.getElementById("loading").style.display = "none";
-        document.querySelector(".viewport").style.display = "block";
-
-        let currentPage = 0;
-        setInterval(() => {
-          currentPage = (currentPage + 1) % 2;
-          document.getElementById("slider").style.transform = `translateX(-${currentPage * 1080}px)`;
-        }, 20000);
+        eventHTML = descHTML.innerHTML.trim();
       } catch (e) {
-        console.error("Fetch failed, retrying in 30s", e);
-        setTimeout(loadEvents, 30000);
+        console.error("Error parsing description:", e);
       }
-    }
 
+      return `
+        <div class="event">
+          <div class="event-title">${title}</div>
+          <div class="event-description">${eventHTML || "<em>No details</em>"}</div>
+        </div>
+      `;
+    });
+
+    const grid1 = document.getElementById("grid1");
+    const grid2 = document.getElementById("grid2");
+
+    grid1.innerHTML = events.slice(0, 10).join("");
+    grid2.innerHTML = events.slice(10, 20).join("");
+
+    document.getElementById("loading").style.display = "none";
+    document.querySelector(".viewport").style.display = "block";
+
+    let currentPage = 0;
+    setInterval(() => {
+      currentPage = (currentPage + 1) % 2;
+      document.getElementById("slider").style.transform = `translateX(-${currentPage * 1080}px)`;
+    }, 20000);
+  } catch (e) {
+    console.error("Fetch failed, retrying in 30s", e);
+    setTimeout(loadEvents, 30000);
+  }
+}
     window.addEventListener("DOMContentLoaded", loadEvents);
   </script>
 </body>
