@@ -1,11 +1,82 @@
 [
   {
     "title": "Youth Fire Safety Camp",
-    "description": "<strong>Event dates:</strong> July 21, 2025 - July 25, 2025<br><strong>Event Time: </strong>09:00 AM - 02:00 PM<br><strong>Location:</strong> <br>1321 Enterprise Drive"
+    "description": "<strong>Event dates:</strong> July 21, 2025 - July 25, 2025<br><strong>Event Time:</strong> 09:00 AM - 02:00 PM<br><strong>Location:</strong> 1321 Enterprise Drive"
   },
   {
     "title": "Pickleball Club at Village Park",
-    "description": "<strong>Event date:</strong> July 24, 2025 <br><strong>Event Time: </strong>05:00 PM - 09:00 PM<br><strong>Location:</strong> <br>900 W Romeo Road"
+    "description": "<strong>Event date:</strong> July 24, 2025<br><strong>Event Time:</strong> 05:00 PM - 09:00 PM<br><strong>Location:</strong> 900 W Romeo Road"
   },
-  ...
+  {
+    "title": "CANCELED - Rockin' the Ville: Horizon",
+    "description": "<strong>Event date:</strong> July 24, 2025<br><strong>Event Time:</strong> 07:00 PM - 09:00 PM<br><strong>Location:</strong> 1050 W Romeo Road"
+  },
+  {
+    "title": "White Oak Library presents Budding Builders",
+    "description": "<strong>Event date:</strong> July 25, 2025<br><strong>Event Time:</strong> 09:30 AM - 10:00 AM<br><strong>Location:</strong> 201 W. Normantown Road"
+  },
+  {
+    "title": "White Oak Library presents Lego Club",
+    "description": "<strong>Event date:</strong> July 25, 2025<br><strong>Event Time:</strong> 03:00 PM - 04:30 PM<br><strong>Location:</strong> 201 W. Normantown Road"
+  },
+  {
+    "title": "Outdoor Yoga",
+    "description": "<strong>Event date:</strong> July 26, 2025<br><strong>Event Time:</strong> 09:00 AM - 10:00 AM<br><strong>Location:</strong> 1050 W Romeo Road"
+  },
+  {
+    "title": "Museum Campus Day",
+    "description": "<strong>Event date:</strong> July 26, 2025<br><strong>Event Time:</strong> 10:00 AM - 04:00 PM<br><strong>Location:</strong> 501 E. Romeo Rd."
+  },
+  {
+    "title": "ESL Reading & Conversation Group",
+    "description": "<strong>Event date:</strong> July 28, 2025<br><strong>Event Time:</strong> 11:00 AM - 12:00 PM<br><strong>Location:</strong> 201 W. Normantown Road"
+  },
+  {
+    "title": "Pickleball Club at Village Park",
+    "description": "<strong>Event date:</strong> July 28, 2025<br><strong>Event Time:</strong> 05:00 PM - 09:00 PM<br><strong>Location:</strong> 900 W Romeo Road"
+  },
+  {
+    "title": "White Oak Library presents Pinochle Club",
+    "description": "<strong>Event date:</strong> July 29, 2025<br><strong>Event Time:</strong> 09:30 AM - 12:30 PM<br><strong>Location:</strong> 201 W. Normantown Road"
+  },
+  {
+    "title": "Rep. Avelar's Traveling Office Hours",
+    "description": "<strong>Event date:</strong> July 29, 2025<br><strong>Event Time:</strong> 05:00 PM - 07:00 PM<br><strong>Location:</strong> 201 W. Normantown Road"
+  },
+  {
+    "title": "Budding Builders",
+    "description": "<strong>Event date:</strong> July 30, 2025<br><strong>Event Time:</strong> 09:30 AM - 10:00 AM<br><strong>Location:</strong> 201 W. Normantown Road"
+  },
+  {
+    "title": "American Mahjong",
+    "description": "<strong>Event date:</strong> July 30, 2025<br><strong>Event Time:</strong> 12:30 PM - 02:30 PM<br><strong>Location:</strong> 201 W. Normantown Road"
+  },
+  {
+    "title": "Business After Hours",
+    "description": "<strong>Event date:</strong> July 30, 2025<br><strong>Event Time:</strong> 05:00 PM - 07:00 PM<br><strong>Location:</strong> 735 Center Blvd."
+  },
+  {
+    "title": "Membership Meeting",
+    "description": "<strong>Event date:</strong> July 31, 2025<br><strong>Event Time:</strong> 08:15 AM - 09:45 AM<br><strong>Location:</strong> 1700 W. Renwick Rd."
+  },
+  {
+    "title": "Discovery Isle: Insects!",
+    "description": "<strong>Event date:</strong> July 31, 2025<br><strong>Event Time:</strong> 01:00 PM - 03:00 PM<br><strong>Location:</strong> 501 E. Romeo Rd."
+  },
+  {
+    "title": "Reading Dragons Party",
+    "description": "<strong>Event date:</strong> July 31, 2025<br><strong>Event Time:</strong> 04:30 PM - 06:00 PM<br><strong>Location:</strong> 201 W. Normantown Road"
+  },
+  {
+    "title": "Pickleball Club at Village Park",
+    "description": "<strong>Event date:</strong> July 31, 2025<br><strong>Event Time:</strong> 05:00 PM - 09:00 PM<br><strong>Location:</strong> 900 W Romeo Road"
+  },
+  {
+    "title": "Rockin' the Ville: The Red Roses",
+    "description": "<strong>Event date:</strong> July 31, 2025<br><strong>Event Time:</strong> 07:00 PM - 09:00 PM<br><strong>Location:</strong> 1050 W Romeo Road"
+  },
+  {
+    "title": "The DeMoulin Bros. Story",
+    "description": "<strong>Event date:</strong> July 31, 2025<br><strong>Event Time:</strong> 07:00 PM - 08:15 PM<br><strong>Location:</strong> 201 W. Normantown Road"
+  }
 ]
