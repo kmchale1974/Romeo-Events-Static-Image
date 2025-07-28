@@ -12,24 +12,10 @@
     html, body {
       margin: 0;
       padding: 0;
-      width: 100vw;
-      height: 100vh;
-      background: #f8f8f8;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .scale-wrapper {
       width: 1080px;
       height: 960px;
-      transform: scale(0.9);
-      transform-origin: top left;
-      overflow: hidden;
+      background: #f8f8f8;
+      font-family: Arial, sans-serif;
     }
 
     .viewport {
@@ -49,7 +35,7 @@
     .page {
       width: 1080px;
       height: 960px;
-      padding: 10px 15px;
+      padding: 10px 20px;
       display: flex;
       flex-direction: column;
     }
@@ -58,7 +44,7 @@
       text-align: center;
       font-size: 26px;
       color: #004A8F;
-      margin: 5px 0 10px;
+      margin: 5px 0 12px;
       flex-shrink: 0;
     }
 
@@ -68,8 +54,6 @@
       grid-template-rows: repeat(5, 1fr);
       gap: 8px;
       flex-grow: 1;
-      height: 100%;
-      overflow: hidden;
     }
 
     .event {
@@ -80,7 +64,6 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      overflow: hidden;
     }
 
     .event-title {
@@ -113,74 +96,67 @@
   </style>
 </head>
 <body>
-  <div class="scale-wrapper">
-    <div id="loading">Loading events…</div>
-    <div class="viewport" style="display: none">
-      <div class="slide-container" id="slider">
-        <div class="page"><h1>Upcoming Events (1–10)</h1><div class="grid" id="grid1"></div></div>
-        <div class="page"><h1>Upcoming Events (11–20)</h1><div class="grid" id="grid2"></div></div>
-      </div>
+  <div id="loading">Loading events…</div>
+  <div class="viewport" style="display: none">
+    <div class="slide-container" id="slider">
+      <div class="page"><h1>Upcoming Events (1–10)</h1><div class="grid" id="grid1"></div></div>
+      <div class="page"><h1>Upcoming Events (11–20)</h1><div class="grid" id="grid2"></div></div>
     </div>
   </div>
 
   <script>
     async function loadEvents() {
-  const rssUrl = "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent("https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml");
-  try {
-    const response = await fetch(rssUrl);
-    const text = await response.text();
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(text, "text/xml");
-    const items = Array.from(xml.querySelectorAll("item"));
-
-    const events = items.slice(0, 20).map(item => {
-      const title = item.querySelector("title")?.textContent || "";
-      const descRaw = item.querySelector("description")?.textContent || "";
-
-      let eventHTML = "<em>No description available</em>";
+      const rssUrl = "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent("https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml");
       try {
-        const descHTML = new DOMParser().parseFromString(descRaw, "text/html").body;
+        const response = await fetch(rssUrl);
+        const text = await response.text();
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(text, "text/xml");
+        const items = Array.from(xml.querySelectorAll("item"));
 
-        // Strip Romeoville, IL ZIP from any text nodes under strong tags
-        descHTML.querySelectorAll("strong").forEach(strong => {
-          const next = strong.nextSibling;
-          if (strong.textContent.includes("Location:") && next?.nodeType === 3) {
-            next.nodeValue = next.nodeValue.replace(/Romeoville, IL\s*\d{5}/, "").trim();
+        const events = items.slice(0, 20).map(item => {
+          const title = item.querySelector("title")?.textContent || "";
+          const descRaw = item.querySelector("description")?.textContent || "";
+
+          let eventHTML = "<em>No description available</em>";
+          try {
+            const descHTML = new DOMParser().parseFromString(descRaw, "text/html").body;
+            descHTML.querySelectorAll("strong").forEach(strong => {
+              const next = strong.nextSibling;
+              if (strong.textContent.includes("Location:") && next?.nodeType === 3) {
+                next.nodeValue = next.nodeValue.replace(/Romeoville, IL\s*\d{5}/, "").trim();
+              }
+            });
+            eventHTML = descHTML.innerHTML.trim();
+          } catch (e) {
+            console.error("Error parsing description:", e);
           }
+
+          return `
+            <div class="event">
+              <div class="event-title">${title}</div>
+              <div class="event-description">${eventHTML || "<em>No details</em>"}</div>
+            </div>
+          `;
         });
 
-        eventHTML = descHTML.innerHTML.trim();
+        document.getElementById("grid1").innerHTML = events.slice(0, 10).join("");
+        document.getElementById("grid2").innerHTML = events.slice(10, 20).join("");
+
+        document.getElementById("loading").style.display = "none";
+        document.querySelector(".viewport").style.display = "block";
+
+        let currentPage = 0;
+        setInterval(() => {
+          currentPage = (currentPage + 1) % 2;
+          document.getElementById("slider").style.transform = `translateX(-${currentPage * 1080}px)`;
+        }, 20000);
       } catch (e) {
-        console.error("Error parsing description:", e);
+        console.error("Fetch failed, retrying in 30s", e);
+        setTimeout(loadEvents, 30000);
       }
+    }
 
-      return `
-        <div class="event">
-          <div class="event-title">${title}</div>
-          <div class="event-description">${eventHTML || "<em>No details</em>"}</div>
-        </div>
-      `;
-    });
-
-    const grid1 = document.getElementById("grid1");
-    const grid2 = document.getElementById("grid2");
-
-    grid1.innerHTML = events.slice(0, 10).join("");
-    grid2.innerHTML = events.slice(10, 20).join("");
-
-    document.getElementById("loading").style.display = "none";
-    document.querySelector(".viewport").style.display = "block";
-
-    let currentPage = 0;
-    setInterval(() => {
-      currentPage = (currentPage + 1) % 2;
-      document.getElementById("slider").style.transform = `translateX(-${currentPage * 1080}px)`;
-    }, 20000);
-  } catch (e) {
-    console.error("Fetch failed, retrying in 30s", e);
-    setTimeout(loadEvents, 30000);
-  }
-}
     window.addEventListener("DOMContentLoaded", loadEvents);
   </script>
 </body>
