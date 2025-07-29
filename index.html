@@ -39,36 +39,29 @@
       width: 100%;
       height: 100%;
       padding: 10px 12px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-evenly;
+      display: none;
       background: #f8f8f8;
       opacity: 0;
       transition: opacity 1s ease-in-out;
     }
 
     .page.active {
+      display: grid;
+      grid-template-rows: repeat(8, 1fr);
+      gap: 6px;
       opacity: 1;
       z-index: 1;
-    }
-
-    .grid {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex-grow: 1;
-      justify-content: space-evenly;
     }
 
     .event {
       background: #fff;
       border-left: 4px solid #004A8F;
-      padding: 5px 8px;
+      padding: 6px 10px;
       box-shadow: 0 0 4px rgba(0,0,0,0.08);
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      height: calc(100% / 8 - 6px);
     }
 
     .event-title {
@@ -76,12 +69,19 @@
       font-weight: bold;
       color: #222;
       margin-bottom: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .event-description {
       font-size: 12px;
       line-height: 1.2;
       color: #333;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
     }
 
     #loading {
@@ -104,9 +104,9 @@
   <div id="loading">Loading events…</div>
   <div class="viewport" style="display: none">
     <div class="slide-container" id="slider">
-      <div class="page" id="page1"><div class="grid" id="grid1"></div></div>
-      <div class="page" id="page2"><div class="grid" id="grid2"></div></div>
-      <div class="page" id="page3"><div class="grid" id="grid3"></div></div>
+      <div class="page" id="page1"></div>
+      <div class="page" id="page2"></div>
+      <div class="page" id="page3"></div>
     </div>
   </div>
 
@@ -164,22 +164,21 @@
           } : null;
         }).filter(e => e !== null).slice(0, 24);
 
-        const grids = [1, 2, 3].map(n => document.getElementById(`grid${n}`));
-        grids.forEach(grid => grid.innerHTML = "");
+        const pages = [1, 2, 3].map(n => document.getElementById(`page${n}`));
+        pages.forEach(p => p.innerHTML = "");
 
         events.forEach((evt, idx) => {
           const div = document.createElement("div");
           div.className = "event";
           div.innerHTML = `<div class="event-title">${evt.title}</div><div class="event-description">${evt.description}</div>`;
           const pageIndex = Math.floor(idx / 8);
-          if (grids[pageIndex]) grids[pageIndex].appendChild(div);
+          if (pages[pageIndex]) pages[pageIndex].appendChild(div);
         });
 
         document.getElementById("loading").style.display = "none";
         document.querySelector(".viewport").style.display = "block";
 
         let currentPage = 0;
-        const pages = ["page1", "page2", "page3"].map(id => document.getElementById(id));
         pages[currentPage].classList.add("active");
 
         setInterval(() => {
