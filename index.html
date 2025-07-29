@@ -24,12 +24,20 @@
       height: 616px;
       overflow: hidden;
       position: relative;
+      opacity: 0;
+      animation: fadeIn 1.5s ease-in forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
     }
 
     .slide-container {
       position: relative;
-      width: 960px;
-      height: 616px;
+      width: 100%;
+      height: 100%;
     }
 
     .page {
@@ -43,12 +51,14 @@
       background: #f8f8f8;
       opacity: 0;
       transition: opacity 1s ease-in-out;
+      overflow-y: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .page.active {
-      display: grid;
-      grid-template-rows: repeat(8, 1fr);
-      gap: 6px;
+      display: flex;
       opacity: 1;
       z-index: 1;
     }
@@ -56,32 +66,25 @@
     .event {
       background: #fff;
       border-left: 4px solid #004A8F;
-      padding: 6px 10px;
+      padding: 8px 12px;
       box-shadow: 0 0 4px rgba(0,0,0,0.08);
-      overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: center;
     }
 
     .event-title {
-      font-size: 14px;
+      font-size: 16px;
       font-weight: bold;
       color: #222;
-      margin-bottom: 2px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      margin-bottom: 4px;
+      white-space: normal;
     }
 
     .event-description {
-      font-size: 12px;
-      line-height: 1.2;
+      font-size: 14px;
+      line-height: 1.4;
       color: #333;
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
     }
 
     #loading {
@@ -137,7 +140,6 @@
               if (strong.textContent.includes("Location:") && next?.nodeType === 3) {
                 next.nodeValue = next.nodeValue.replace(/Romeoville, IL\s*\d{5}/, "").trim();
               }
-
               if ((strong.textContent.includes("Event date") || strong.textContent.includes("Event dates")) && next?.nodeType === 3) {
                 const text = next.nodeValue.trim();
                 const match = text.match(/([A-Za-z]+ \d{1,2}, \d{4})(\s*-\s*([A-Za-z]+ \d{1,2}, \d{4}))?/);
@@ -162,29 +164,52 @@
             description: eventHTML,
             date: eventDate
           } : null;
-        }).filter(e => e !== null).slice(0, 24);
+        }).filter(e => e !== null);
 
         const pages = [1, 2, 3].map(n => document.getElementById(`page${n}`));
         pages.forEach(p => p.innerHTML = "");
 
-        events.forEach((evt, idx) => {
-          const div = document.createElement("div");
-          div.className = "event";
-          div.innerHTML = `<div class="event-title">${evt.title}</div><div class="event-description">${evt.description}</div>`;
-          const pageIndex = Math.floor(idx / 8);
-          if (pages[pageIndex]) pages[pageIndex].appendChild(div);
-        });
+        if (events.length === 0) {
+          pages[0].innerHTML = '<div style="font-size: 20px; color: #333; display: flex; align-items: center; justify-content: center; height: 100%;">No upcoming events.</div>';
+        } else {
+          let currentPage = 0;
+          let currentHeight = 0;
+          const maxHeight = 590;
+
+          for (let evt of events) {
+            const tempDiv = document.createElement("div");
+            tempDiv.className = "event";
+            tempDiv.innerHTML = `<div class="event-title">${evt.title}</div><div class="event-description">${evt.description}</div>`;
+            tempDiv.style.position = "absolute";
+            tempDiv.style.visibility = "hidden";
+            document.body.appendChild(tempDiv);
+            const evtHeight = tempDiv.offsetHeight + 8;
+            document.body.removeChild(tempDiv);
+
+            if (currentHeight + evtHeight > maxHeight && currentPage < 2) {
+              currentPage++;
+              currentHeight = 0;
+            }
+            if (pages[currentPage]) {
+              const eventDiv = document.createElement("div");
+              eventDiv.className = "event";
+              eventDiv.innerHTML = `<div class="event-title">${evt.title}</div><div class="event-description">${evt.description}</div>`;
+              pages[currentPage].appendChild(eventDiv);
+              currentHeight += evtHeight;
+            }
+          }
+        }
 
         document.getElementById("loading").style.display = "none";
         document.querySelector(".viewport").style.display = "block";
 
-        let currentPage = 0;
-        pages[currentPage].classList.add("active");
+        let currentPageIndex = 0;
+        pages[currentPageIndex].classList.add("active");
 
         setInterval(() => {
-          pages[currentPage].classList.remove("active");
-          currentPage = (currentPage + 1) % 3;
-          pages[currentPage].classList.add("active");
+          pages[currentPageIndex].classList.remove("active");
+          currentPageIndex = (currentPageIndex + 1) % 3;
+          pages[currentPageIndex].classList.add("active");
         }, 20000);
 
       } catch (e) {
