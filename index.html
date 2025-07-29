@@ -54,7 +54,7 @@
       overflow-y: hidden;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .page.active {
@@ -65,26 +65,29 @@
 
     .event {
       background: #fff;
-      border-left: 4px solid #004A8F;
-      padding: 8px 12px;
-      box-shadow: 0 0 4px rgba(0,0,0,0.08);
+      border-left: 5px solid #004A8F;
+      padding: 12px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.1);
       display: flex;
       flex-direction: column;
       justify-content: center;
+      flex: 1 1 auto;
     }
 
     .event-title {
-      font-size: 16px;
+      font-size: 2.2vh;
       font-weight: bold;
       color: #222;
-      margin-bottom: 4px;
+      margin-bottom: 1vh;
       white-space: normal;
+      line-height: 1.2;
     }
 
     .event-description {
-      font-size: 14px;
+      font-size: 1.8vh;
       line-height: 1.4;
       color: #333;
+      flex-grow: 1;
     }
 
     #loading {
@@ -98,7 +101,7 @@
       justify-content: center;
       background: #f8f8f8;
       z-index: 999;
-      font-size: 22px;
+      font-size: 24px;
       color: #666;
     }
   </style>
@@ -173,30 +176,13 @@
           pages[0].innerHTML = '<div style="font-size: 20px; color: #333; display: flex; align-items: center; justify-content: center; height: 100%;">No upcoming events.</div>';
         } else {
           let currentPage = 0;
-          let currentHeight = 0;
-          const maxHeight = 590;
-
-          for (let evt of events) {
-            const tempDiv = document.createElement("div");
-            tempDiv.className = "event";
-            tempDiv.innerHTML = `<div class="event-title">${evt.title}</div><div class="event-description">${evt.description}</div>`;
-            tempDiv.style.position = "absolute";
-            tempDiv.style.visibility = "hidden";
-            document.body.appendChild(tempDiv);
-            const evtHeight = tempDiv.offsetHeight + 8;
-            document.body.removeChild(tempDiv);
-
-            if (currentHeight + evtHeight > maxHeight && currentPage < 2) {
-              currentPage++;
-              currentHeight = 0;
-            }
-            if (pages[currentPage]) {
-              const eventDiv = document.createElement("div");
-              eventDiv.className = "event";
-              eventDiv.innerHTML = `<div class="event-title">${evt.title}</div><div class="event-description">${evt.description}</div>`;
-              pages[currentPage].appendChild(eventDiv);
-              currentHeight += evtHeight;
-            }
+          for (let i = 0; i < events.length; i++) {
+            const evt = events[i];
+            const eventDiv = document.createElement("div");
+            eventDiv.className = "event";
+            eventDiv.innerHTML = `<div class="event-title">${evt.title}</div><div class="event-description">${evt.description}</div>`;
+            pages[currentPage].appendChild(eventDiv);
+            if ((i + 1) % 4 === 0 && currentPage < 2) currentPage++;
           }
         }
 
