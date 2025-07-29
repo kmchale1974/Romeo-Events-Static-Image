@@ -143,7 +143,16 @@
           descHTML.querySelectorAll("strong").forEach(strong => {
             const label = strong.textContent.trim();
             const next = strong.nextSibling;
-            const value = next?.textContent?.trim() || next?.nodeValue?.trim() || "";
+            
+    let value = "";
+    if (next) {
+      if (next.nodeType === 3) {
+        value = next.nodeValue.trim();
+      } else if (next.textContent) {
+        value = next.textContent.trim();
+      }
+    }
+    
 
             if (label.includes("Event date") || label.includes("Event dates")) {
               dateText = value;
