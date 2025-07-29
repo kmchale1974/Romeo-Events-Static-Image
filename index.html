@@ -12,57 +12,58 @@
     html, body {
       margin: 0;
       padding: 0;
-      width: 1080px;
-      height: 960px;
+      width: 960px;
+      height: 616px;
       background: #f8f8f8;
       font-family: Arial, sans-serif;
       overflow: hidden;
     }
 
     .viewport {
-      width: 1080px;
-      height: 960px;
+      width: 960px;
+      height: 616px;
       overflow: hidden;
       position: relative;
     }
 
     .slide-container {
-      display: flex;
-      width: 2160px;
-      height: 960px;
-      transition: transform 1s ease-in-out;
+      position: relative;
+      width: 960px;
+      height: 616px;
     }
 
     .page {
-      width: 1080px;
-      height: 960px;
-      padding: 10px 40px;
-      display: flex;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 960px;
+      height: 616px;
+      padding: 10px 16px;
+      display: none;
       flex-direction: column;
-      flex-shrink: 0;
+      justify-content: flex-start;
+      background: #f8f8f8;
+      transition: opacity 1s ease-in-out;
     }
 
-    h1 {
-      text-align: center;
-      font-size: 26px;
-      color: #004A8F;
-      margin: 5px 0 12px;
-      flex-shrink: 0;
+    .page.active {
+      display: flex;
+      opacity: 1;
+      z-index: 1;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       grid-template-rows: repeat(5, 1fr);
-      gap: 8px;
+      gap: 10px;
       flex-grow: 1;
-      overflow: hidden;
     }
 
     .event {
       background: #fff;
       border-left: 4px solid #004A8F;
-      padding: 6px 8px;
+      padding: 6px 10px;
       box-shadow: 0 0 4px rgba(0,0,0,0.08);
       display: flex;
       flex-direction: column;
@@ -70,7 +71,7 @@
     }
 
     .event-title {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: bold;
       color: #222;
       margin-bottom: 4px;
@@ -102,27 +103,31 @@
   <div id="loading">Loading events…</div>
   <div class="viewport" style="display: none">
     <div class="slide-container" id="slider">
-      <div class="page"><h1>Upcoming Events (1–10)</h1><div class="grid" id="grid1"></div></div>
-      <div class="page"><h1>Upcoming Events (11–20)</h1><div class="grid" id="grid2"></div></div>
+      <div class="page" id="page1"><div class="grid" id="grid1"></div></div>
+      <div class="page" id="page2"><div class="grid" id="grid2"></div></div>
+      <div class="page" id="page3"><div class="grid" id="grid3"></div></div>
+      <div class="page" id="page4"><div class="grid" id="grid4"></div></div>
     </div>
   </div>
 
   <script>
     async function loadEvents() {
-      const rssUrl = "https://corsproxy.io/?" + encodeURIComponent("https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml");
+      const rssUrl = "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent("https://www.romeoville.org/RSSFeed.aspx?ModID=58&CID=All-calendar.xml");
       try {
         const response = await fetch(rssUrl);
         const text = await response.text();
         const parser = new DOMParser();
         const xml = parser.parseFromString(text, "text/xml");
         const items = Array.from(xml.querySelectorAll("item"));
-        console.log("Raw items from feed:", items.length);
 
-        const events = items.slice(0, 20).map(item => {
+        const now = new Date();
+        const events = items.map(item => {
           const title = item.querySelector("title")?.textContent || "";
           const descRaw = item.querySelector("description")?.textContent || "";
 
           let eventHTML = "<em>No description available</em>";
+          let eventDate = null;
+
           try {
             const descHTML = new DOMParser().parseFromString(descRaw, "text/html").body;
             descHTML.querySelectorAll("strong").forEach(strong => {
@@ -130,44 +135,55 @@
               if (strong.textContent.includes("Location:") && next?.nodeType === 3) {
                 next.nodeValue = next.nodeValue.replace(/Romeoville, IL\s*\d{5}/, "").trim();
               }
+
+              if ((strong.textContent.includes("Event date") || strong.textContent.includes("Event dates")) && next?.nodeType === 3) {
+                const text = next.nodeValue.trim();
+                const match = text.match(/([A-Za-z]+ \d{1,2}, \d{4})(\s*-\s*([A-Za-z]+ \d{1,2}, \d{4}))?/);
+                if (match) {
+                  const startDate = new Date(match[1]);
+                  const endDate = match[3] ? new Date(match[3]) : startDate;
+                  if (endDate >= now) {
+                    eventDate = startDate;
+                  }
+                }
+              }
             });
             eventHTML = descHTML.innerHTML.trim();
           } catch (e) {
             console.error("Error parsing description:", e);
           }
 
-          return {
+          return eventDate ? {
             title: title,
-            description: eventHTML || "<em>No details</em>"
-          };
-        });
+            description: eventHTML,
+            date: eventDate
+          } : null;
+        }).filter(e => e !== null).slice(0, 20);
 
-        console.log("Parsed events:", events.length);
-
-        const grid1 = document.getElementById("grid1");
-        const grid2 = document.getElementById("grid2");
-        grid1.innerHTML = "";
-        grid2.innerHTML = "";
+        const grids = [1, 2, 3, 4].map(n => document.getElementById(`grid${n}`));
+        grids.forEach(grid => grid.innerHTML = "");
 
         events.forEach((evt, idx) => {
           const div = document.createElement("div");
           div.className = "event";
           div.innerHTML = `<div class="event-title">${evt.title}</div><div class="event-description">${evt.description}</div>`;
-          if (idx < 10) grid1.appendChild(div);
-          else grid2.appendChild(div);
+          const pageIndex = Math.floor(idx / 5);
+          if (grids[pageIndex]) grids[pageIndex].appendChild(div);
         });
-
-        console.log("Grid1 count:", grid1.children.length);
-        console.log("Grid2 count:", grid2.children.length);
 
         document.getElementById("loading").style.display = "none";
         document.querySelector(".viewport").style.display = "block";
 
         let currentPage = 0;
+        const pages = ["page1", "page2", "page3", "page4"].map(id => document.getElementById(id));
+        pages[currentPage].classList.add("active");
+
         setInterval(() => {
-          currentPage = (currentPage + 1) % 2;
-          document.getElementById("slider").style.transform = `translateX(-${currentPage * 1080}px)`;
+          pages[currentPage].classList.remove("active");
+          currentPage = (currentPage + 1) % 4;
+          pages[currentPage].classList.add("active");
         }, 20000);
+
       } catch (e) {
         console.error("Fetch failed, retrying in 30s", e);
         setTimeout(loadEvents, 30000);
