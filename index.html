@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -141,19 +142,20 @@
 
           descHTML.querySelectorAll("strong").forEach(strong => {
             const label = strong.textContent.trim();
-            const next = strong.nextSibling?.textContent?.trim() || "";
+            const next = strong.nextSibling;
+            const value = next?.textContent?.trim() || next?.nodeValue?.trim() || "";
 
             if (label.includes("Event date") || label.includes("Event dates")) {
-              dateText = next;
-              const match = next.match(/([A-Za-z]+ \d{1,2}, \d{4})/);
+              dateText = value;
+              const match = value.match(/([A-Za-z]+ \d{1,2}, \d{4})/);
               if (match) {
                 eventDate = new Date(match[1]);
                 eventDate.setHours(0,0,0,0);
               }
             } else if (label.includes("Event Time:")) {
-              timeText = next;
+              timeText = value;
             } else if (label.includes("Location:")) {
-              locationText = next.replace(/Romeoville, IL\\s*\\d{5}/, "").trim();
+              locationText = value.replace(/Romeoville, IL\s*\d{5}/, "").trim();
             }
           });
 
