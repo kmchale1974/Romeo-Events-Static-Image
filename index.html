@@ -39,7 +39,7 @@
       height: 100%;
       display: none;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: flex-start;
       padding: 8px 14px;
       background: #f8f8f8;
       opacity: 0;
@@ -53,6 +53,8 @@
     }
 
     .event {
+  height: calc((100% - (7 * 6px)) / 8);
+  margin-bottom: 6px;
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -65,24 +67,24 @@
     }
 
     .event:last-child {
-      margin-bottom: 0;
-    }
+  margin-bottom: 0;
+}
 
     .event-title {
-      font-size: 18px;
+      font-size: 14px;
       font-weight: bold;
       color: #222;
       margin-bottom: 4px;
     }
 
     .event-line {
-      font-size: 16px;
+      font-size: 14px;
       color: #333;
       margin-bottom: 2px;
     }
 
     .event-description {
-      font-size: 15px;
+      font-size: 14px;
       color: #555;
     }
 
