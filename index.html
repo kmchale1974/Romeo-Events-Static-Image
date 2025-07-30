@@ -7,71 +7,91 @@
   <title>Romeoville Events</title>
   <style>
     * { box-sizing: border-box; }
+
     html, body {
       margin: 0;
       padding: 0;
       width: 960px;
-      height: 612px;
-      background: #f8f8f8;
+      height: 616px;
       font-family: Arial, sans-serif;
+      background: #f8f8f8;
       overflow: hidden;
     }
+
     .viewport {
       width: 960px;
-      height: 612px;
+      height: 616px;
       overflow: hidden;
       position: relative;
     }
+
     .slide-container {
       position: relative;
-      width: 960px;
-      height: 612px;
-    }
-    .page {
-      position: absolute;
-      top: 0; left: 0;
       width: 100%;
       height: 100%;
-      padding: 2px 10px;
+    }
+
+    .page {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 8px 14px;
       background: #f8f8f8;
       opacity: 0;
       transition: opacity 1s ease-in-out;
     }
+
     .page.active {
-      display: grid;
-      grid-template-rows: repeat(8, 1fr);
-      gap: 6px;
+      display: flex;
       opacity: 1;
       z-index: 1;
     }
+
     .event {
-      background: #fff;
-      border-left: 4px solid #004A8F;
-      padding: 8px 10px;
-      box-shadow: 0 0 4px rgba(0,0,0,0.08);
+      flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      background: #fff;
+      border-left: 4px solid #004A8F;
+      padding: 10px 14px;
+      margin-bottom: 6px;
+      box-shadow: 0 0 4px rgba(0,0,0,0.08);
     }
+
+    .event:last-child {
+      margin-bottom: 0;
+    }
+
     .event-title {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: bold;
       color: #222;
       margin-bottom: 4px;
     }
+
     .event-line {
-      font-size: 14px;
+      font-size: 16px;
       color: #333;
       margin-bottom: 2px;
     }
+
     .event-description {
-      font-size: 14px;
+      font-size: 15px;
       color: #555;
     }
+
     #loading {
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -138,7 +158,6 @@
         });
 
         const pages = [1, 2, 3].map(n => document.getElementById("page" + n)).filter(p => p);
-        if (!pages.length) throw new Error("Pages not found");
         pages.forEach(p => p.innerHTML = "");
 
         if (!events.length) {
@@ -174,6 +193,7 @@
         setTimeout(loadEvents, 30000);
       }
     }
+
     window.addEventListener("DOMContentLoaded", loadEvents);
   </script>
 </body>
